@@ -1,0 +1,56 @@
+rlmppi/
+│
+├── models/
+│   ├── __init__.py
+│   ├── dsac.py         # 增强版DSAC实现
+│   ├── dynamics.py     # 动态模型实现
+│   └── mppi.py         # MPPI控制器实现
+│
+├── utils/
+│   ├── __init__.py
+│   ├── buffer.py       # 经验回放缓冲区
+│   └── utils.py        # 辅助函数和工具
+│
+├── environment/
+│   ├── __init__.py
+│   └── uav.py          # UAV环境的改进版本
+│
+├── train_offline.py    # 离线RL训练脚本
+├── train_dynamics.py   # 动态模型训练脚本
+└── run_rlmppi.py       # 在线RLMPPI控制脚本
+
+
+完整运行步骤
+1. 离线RL模型训练
+首先，训练DSAC强化学习模型：
+
+python train_offline.py --device cuda --dt 0.05
+这将训练一个强化学习策略模型，并保存到./results/models/目录下。训练过程可能需要一些时间，因为它涉及500,000步的交互。
+
+2. 动力学模型训练
+接下来，训练神经网络动力学模型：
+
+python train_dynamics.py --device cuda --dt 0.05
+这将收集数据并训练一个动力学模型，用于预测状态转换。模型将保存到./results/dynamics_models/目录下。
+
+3. 运行RL-MPPI控制器
+最后，使用训练好的模型运行RL-MPPI控制器：
+
+python run_rlmppi.py --device cuda --method rlmppi
+您也可以尝试其他控制方法进行比较：
+
+纯MPPI控制：--method mppi
+纯RL控制：--method rl
+注意事项
+确保您的CUDA环境已正确设置（如果使用GPU加速）。如果没有GPU，可以使用--device cpu参数。
+
+训练过程中会在./results/目录下生成多个文件和子目录，确保有足够的磁盘空间。
+
+在run_rlmppi.py中，您可以调整参数如回合数、目标半径等：
+
+python run_rlmppi.py --device cuda --method rlmppi --num_episodes 20 --target_radius 1.5
+代码已经按照论文严格实现，移除了额外的参数和启发式方法。如果您对控制性能不满意，可以考虑调整参数，但要注意这可能会偏离论文的原始实现。
+
+结果将保存在./results/rlmppi/目录下，包括轨迹可视化和性能统计。
+
+祝您顺利运行项目！如果遇到任何问题，可以随时提问。
